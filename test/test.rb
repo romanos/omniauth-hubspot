@@ -1,21 +1,21 @@
 require "helper"
-require "omniauth-slack"
+require "omniauth-hubspot-full"
 
 class StrategyTest < StrategyTestCase
   include OAuth2StrategyTests
 end
 
 class ClientTest < StrategyTestCase
-  test "has correct Slack site" do
-    assert_equal "https://slack.com", strategy.client.site
+  test "has correct Hubspot API site" do
+    assert_equal "https://api.hubapi.com", strategy.client.site
   end
 
   test "has correct authorize url" do
-    assert_equal "/oauth/authorize", strategy.client.options[:authorize_url]
+    assert_equal "https://app.hubspot.com/oauth/authorize", strategy.client.options[:authorize_url]
   end
 
   test "has correct token url" do
-    assert_equal "/api/oauth.access", strategy.client.options[:token_url]
+    assert_equal "/oauth/v1/token", strategy.client.options[:token_url]
   end
 end
 
@@ -24,26 +24,26 @@ class CallbackUrlTest < StrategyTestCase
     url_base = "http://auth.request.com"
     @request.stubs(:url).returns("#{url_base}/some/page")
     strategy.stubs(:script_name).returns("") # as not to depend on Rack env
-    assert_equal "#{url_base}/auth/slack/callback", strategy.callback_url
+    assert_equal "#{url_base}/auth/hubspot/callback", strategy.callback_url
   end
 
   test "returns path from callback_path option" do
-    @options = { :callback_path => "/auth/slack/done"}
+    @options = { :callback_path => "/auth/hubspot/done"}
     url_base = "http://auth.request.com"
     @request.stubs(:url).returns("#{url_base}/page/path")
     strategy.stubs(:script_name).returns("") # as not to depend on Rack env
-    assert_equal "#{url_base}/auth/slack/done", strategy.callback_url
+    assert_equal "#{url_base}/auth/hubspot/done", strategy.callback_url
   end
 end
 
 class UidTest < StrategyTestCase
   def setup
     super
-    strategy.stubs(:identity).returns("user" => {"id" => "U123"}, "team" => {"id" => "T456"})
+    strategy.stubs(:identity).returns({"user_id" => "U123", "hub_id" => "H456"})
   end
 
   test "returns the user ID from user_identity" do
-    assert_equal "U123-T456", strategy.uid
+    assert_equal "U123-H456", strategy.uid
   end
 end
 
@@ -54,6 +54,7 @@ class CredentialsTest < StrategyTestCase
     @access_token.stubs(:token)
     @access_token.stubs(:expires?)
     @access_token.stubs(:expires_at)
+    @access_token.stubs(:expires_in)
     @access_token.stubs(:refresh_token)
     strategy.stubs(:access_token).returns(@access_token)
   end
@@ -104,23 +105,14 @@ class UserInfoTest < StrategyTestCase
   def setup
     super
     @access_token = stub("OAuth2::AccessToken")
+    @access_token.stubs(:token).returns("1234")
     strategy.stubs(:access_token).returns(@access_token)
   end
 
-  test "performs a GET to https://slack.com/api/users.identity" do
-    @access_token.expects(:get).with("/api/users.identity")
+  test "performs a GET to https://api.hubapi.com/oauth/v1/access-tokens/" do
+    @access_token.expects(:get).with("/oauth/v1/access-tokens/#{@access_token.token}")
       .returns(stub_everything("OAuth2::Response"))
     strategy.identity
-  end
-
-end
-
-class SkipInfoTest < StrategyTestCase
-
-  test 'info should not include extended info when skip_info is specified' do
-    @options = { skip_info: true }
-    strategy.stubs(:identity).returns({})
-    assert_equal %w[name email image team_name], strategy.info.keys.map(&:to_s)
   end
 
 end

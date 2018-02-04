@@ -1,7 +1,7 @@
 require "bundler/setup"
 require "minitest/autorun"
 require "mocha/setup"
-require "omniauth/strategies/slack"
+require "omniauth/strategies/hubspot"
 
 OmniAuth.config.test_mode = true
 
@@ -47,7 +47,7 @@ class StrategyTestCase < TestCase
   def strategy
     @strategy ||= begin
       args = [@client_id, @client_secret, @options].compact
-      OmniAuth::Strategies::Slack.new(nil, *args).tap do |strategy|
+      OmniAuth::Strategies::Hubspot.new(nil, *args).tap do |strategy|
         strategy.stubs(:request).returns(@request)
       end
     end
