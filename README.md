@@ -78,3 +78,7 @@ Querying the access token endpoint as defined [here](https://developers.hubspot.
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Special Thanks
+
+In a rush, I borrowed heavily from [kmrshntr](https://github.com/kmrshntr)'s Slack Strategy in order to make this work. Thanks!
