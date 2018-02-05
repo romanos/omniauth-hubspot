@@ -30,7 +30,7 @@ module OmniAuth
         {
           token:          access_token.token,
           refresh_token:  access_token.refresh_token,
-          expires_at:     access_token.expires_at,
+          expires_at:     Time.at( access_token.expires_at ),
           expires_in:     access_token.expires_in,
           expires:        access_token.expires?
         }
@@ -57,10 +57,9 @@ module OmniAuth
           user_id:    identity['user_id'],
           user:       identity['user'],    
           hub_id:     identity['hub_id'],
-          hub_domain: identity['image_48'], 
+          hub_domain: identity['hub_domain'], 
           app_id:     identity['app_id'],
           scopes:     identity['scopes']
-
         }
       end
 
