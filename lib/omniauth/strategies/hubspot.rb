@@ -7,7 +7,7 @@ module OmniAuth
     class Hubspot < OmniAuth::Strategies::OAuth2
       option :name, 'hubspot'
 
-      option :authorize_options, [:scope]
+      option :authorize_options, [:scope, :optional_scope]
 
       option :client_options, {
         site:           'https://api.hubapi.com',
@@ -55,9 +55,9 @@ module OmniAuth
       info do
         {
           user_id:    identity['user_id'],
-          user:       identity['user'],    
+          user:       identity['user'],
           hub_id:     identity['hub_id'],
-          hub_domain: identity['hub_domain'], 
+          hub_domain: identity['hub_domain'],
           app_id:     identity['app_id'],
           scopes:     identity['scopes']
         }
@@ -73,7 +73,7 @@ module OmniAuth
 
       def authorize_params
         super.tap do |params|
-          %w[scope].each do |v|
+          %w[scope optional_scope].each do |v|
             if request.params[v]
               params[v.to_sym] = request.params[v]
             end
